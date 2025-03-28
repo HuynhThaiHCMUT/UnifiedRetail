@@ -1,15 +1,15 @@
-import { ApiError } from '@/dto/error.dto';
-import { SerializedError } from '@reduxjs/toolkit';
-import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+import { ApiError } from '@/dto/error.dto'
+import { SerializedError } from '@reduxjs/toolkit'
+import { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 
 const handleError = (
-    error: FetchBaseQueryError | SerializedError | undefined,
+    error: FetchBaseQueryError | SerializedError | undefined
 ): string => {
-    if (!error) return '';
-    console.error(error);
+    if (!error) return ''
+    console.error(error)
     if ('name' in error) {
         if (error.name == 'AbortError') {
-            return 'Không thể kết nối đến máy chủ, vui lòng thử lại sau';
+            return 'Không thể kết nối đến máy chủ, vui lòng thử lại sau'
         }
     }
     if (
@@ -18,9 +18,9 @@ const handleError = (
         typeof error.data === 'object' &&
         'message' in (error.data as ApiError)
     ) {
-        return (error.data as ApiError).message;
+        return (error.data as ApiError).message
     }
-    return 'Đã xảy ra lỗi, vui lòng thử lại sau';
-};
+    return 'Đã xảy ra lỗi, vui lòng thử lại sau'
+}
 
-export default handleError;
+export default handleError

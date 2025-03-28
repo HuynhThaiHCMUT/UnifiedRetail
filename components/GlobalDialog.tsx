@@ -1,7 +1,7 @@
-import { closeDialog } from "@/utils/dialog.slice"
-import { useAppDispatch, useAppSelector } from "@/utils/hook"
-import { IconDialog } from "./IconDialog"
-import { RootState } from "@/utils/store"
+import { closeDialog } from '@/utils/dialog.slice'
+import { useAppDispatch, useAppSelector } from '@/utils/hook'
+import { IconDialog } from './IconDialog'
+import { RootState } from '@/utils/store'
 
 export function GlobalDialog() {
     const dispatch = useAppDispatch()

@@ -62,7 +62,8 @@ const baseQueryWithReauth: BaseQueryFn<
                     url: 'auth/refresh',
                     method: 'POST',
                     body: {
-                        token: (api.getState() as RootState).auth.user.refreshToken,
+                        token: (api.getState() as RootState).auth.user
+                            .refreshToken,
                         userId: (api.getState() as RootState).auth.user.id,
                     },
                 },
