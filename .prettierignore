@@ -1,0 +1,9 @@
+# Ignore artifacts:
+build
+coverage
+
+**/.git
+**/.tamagui
+**/.svn
+**/.hg
+**/node_modules
