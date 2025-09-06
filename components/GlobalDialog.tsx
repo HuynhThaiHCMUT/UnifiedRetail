@@ -1,21 +1,28 @@
-import { closeDialog } from '@/utils/dialog.slice'
+import { closeDialog, runDialogCallback } from '@/utils/dialog.slice'
 import { useAppDispatch, useAppSelector } from '@/utils/hook'
 import { IconDialog } from './IconDialog'
 import { RootState } from '@/utils/store'
+import { ConfirmDialog } from './ConfirmDialog'
 
 export function GlobalDialog() {
-    const dispatch = useAppDispatch()
-    const { open, type, title, message } = useAppSelector(
-        (state: RootState) => state.dialog
-    )
+  const dispatch = useAppDispatch()
+  const dialogState = useAppSelector((state: RootState) => state.dialog)
 
+  const close = () => {
+    dispatch(closeDialog())
+    runDialogCallback('onDialogClose')
+  }
+
+  const confirm = () => {
+    runDialogCallback('onDialogConfirm')
+    close()
+  }
+
+  if (dialogState.type == 'confirm') {
     return (
-        <IconDialog
-            type={type || 'info'}
-            title={title || ''}
-            message={message || ''}
-            open={open}
-            onClose={() => dispatch(closeDialog())}
-        />
+      <ConfirmDialog {...dialogState} onClose={close} onConfirm={confirm} />
     )
+  }
+
+  return <IconDialog {...dialogState} onClose={close} />
 }

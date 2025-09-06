@@ -1,58 +1,57 @@
 import { z } from 'zod'
 import {
-    CreateOrderProductDtoSchema,
-    OrderProductDtoSchema,
-    UpdateOrderProductDtoSchema,
+  CreateOrderProductDtoSchema,
+  OrderProductDtoSchema,
+  UpdateOrderProductDtoSchema,
 } from './order-product.dto'
 import {
-    dateSchema,
-    emailSchema,
-    integerSchema,
-    orderStatusSchema,
-    phoneSchema,
-    requiredStringSchema,
+  dateSchema,
+  emailSchema,
+  integerSchema,
+  orderStatusSchema,
+  phoneSchema,
+  requiredStringSchema,
 } from '@/utils/schema'
 
 export const CreatePOSOrderDtoSchema = z.object({
-    products: z.array(OrderProductDtoSchema),
+  products: z.array(CreateOrderProductDtoSchema),
 })
 
 export type CreatePOSOrderDto = z.infer<typeof CreatePOSOrderDtoSchema>
 
 export const CreateOnlineOrderDtoSchema = CreatePOSOrderDtoSchema.extend({
-    customerId: z.string().optional(),
-    address: z.string().optional(),
-    phone: phoneSchema.optional(),
-    email: emailSchema.optional(),
-    customerName: z.string().optional(),
+  customerId: z.string().nullish(),
+  address: z.string().nullish(),
+  phone: phoneSchema.nullish(),
+  email: emailSchema.nullish(),
+  customerName: z.string().nullish(),
 })
 
 export type CreateOnlineOrderDto = z.infer<typeof CreateOnlineOrderDtoSchema>
 
 export const UpdateOrderDtoSchema = z.object({
-    id: requiredStringSchema('id'),
-    status: orderStatusSchema.optional(),
-    address: z.string().optional(),
-    phone: phoneSchema.optional(),
-    email: emailSchema.optional(),
-    customerName: z.string().optional(),
-    products: z
-        .array(
-            z.union([CreateOrderProductDtoSchema, UpdateOrderProductDtoSchema])
-        )
-        .optional(),
+  id: requiredStringSchema('id'),
+  status: orderStatusSchema.nullish(),
+  address: z.string().nullish(),
+  phone: phoneSchema.nullish(),
+  email: emailSchema.nullish(),
+  customerName: z.string().nullish(),
+  products: z
+    .array(z.union([CreateOrderProductDtoSchema, UpdateOrderProductDtoSchema]))
+    .nullish(),
 })
 
 export type UpdateOrderDto = z.infer<typeof UpdateOrderDtoSchema>
 
 export const OrderDtoSchema = z.object({
-    id: requiredStringSchema('id'),
-    status: orderStatusSchema,
-    total: integerSchema('Tổng tiền'),
-    createdAt: dateSchema('Ngày tạo'),
-    updatedAt: dateSchema('Ngày cập nhật'),
-    staffId: z.string().optional(),
-    products: z.array(z.object({ OrderProductDtoSchema })),
+  id: requiredStringSchema('id'),
+  name: requiredStringSchema('Tên đơn hàng'),
+  status: orderStatusSchema,
+  total: integerSchema('Tổng tiền'),
+  createdAt: dateSchema('Ngày tạo'),
+  updatedAt: dateSchema('Ngày cập nhật'),
+  staffId: z.string().nullish(),
+  products: z.array(z.object({ OrderProductDtoSchema })),
 })
 
 export type OrderDto = z.infer<typeof OrderDtoSchema>

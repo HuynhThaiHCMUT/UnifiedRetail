@@ -1,81 +1,64 @@
-import { DialogType } from '@/utils/dialog.slice'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { useColorScheme } from 'react-native'
-import { Dialog, Button, Stack, Text, getThemes } from 'tamagui'
+import { DialogProps, DialogVariant } from '@/utils/dialog.slice'
+import { CircleAlert, CircleCheckBig, CircleX } from '@tamagui/lucide-icons'
+import React, { ReactElement } from 'react'
+import { AlertDialog, Button, Stack, Text } from 'tamagui'
 
-interface IconDialogProps {
-    type: DialogType
-    title: string
-    message: string
-    open: boolean
-    onClose: () => void
+const typeColors: Record<DialogVariant, 'red' | 'blue' | 'yellow' | 'green'> = {
+  error: 'red',
+  info: 'blue',
+  warning: 'yellow',
+  success: 'green',
 }
 
-const typeColors: Record<DialogType, 'red' | 'blue' | 'yellow'> = {
-    error: 'red',
-    info: 'blue',
-    warning: 'yellow',
+const typeIcons: Record<DialogVariant, ReactElement> = {
+  error: <CircleAlert color="$colorFocus" size="$5" />,
+  info: <CircleX color="$colorFocus" size="$5" />,
+  warning: <CircleAlert color="$colorFocus" size="$5" />,
+  success: <CircleCheckBig color="$colorFocus" size="$5" />,
 }
-
-const typeIcons: Record<DialogType, 'alert-circle' | 'information' | 'alert'> =
-    {
-        error: 'alert-circle',
-        info: 'information',
-        warning: 'alert',
-    }
 
 export function IconDialog({
-    open,
-    type,
-    title,
-    message,
-    onClose,
-}: IconDialogProps) {
-    const scheme = useColorScheme()
-    const themeName = `${scheme}_${typeColors[type]}`
-    const theme = getThemes()
-    return (
-        <Dialog
-            open={open}
-            onOpenChange={() => {
-                if (!open) {
-                    onClose()
-                }
-            }}
+  open = false,
+  variant = 'info',
+  title,
+  message,
+  onClose,
+  confirmLabel = 'Xác nhận',
+}: DialogProps) {
+  return (
+    <AlertDialog open={open} onOpenChange={() => !open && onClose && onClose()}>
+      <AlertDialog.Portal>
+        <AlertDialog.Overlay themeInverse opacity={0.1} />
+        <AlertDialog.Content
+          elevate
+          key="content"
+          bg="$background"
+          rounded="$4"
+          py="$6"
+          width="$20"
         >
-            <Dialog.Portal>
-                <Dialog.Overlay themeInverse opacity={0.1} />
-                <Dialog.Content
-                    elevate
-                    key="content"
-                    background="$background"
-                    rounded="$4"
-                    paddingBlock="$6"
-                    width="$20"
-                >
-                    <Stack items="center">
-                        <MaterialCommunityIcons
-                            name={typeIcons[type]}
-                            size={48}
-                            color={theme[themeName].colorFocus?.val}
-                        />
-                        <Dialog.Title fontSize="$6" fontWeight="bold">
-                            {title}
-                        </Dialog.Title>
-                        <Text fontSize="$4" marginBlockStart="$2" text="center">
-                            {message}
-                        </Text>
-                        <Button
-                            marginBlockStart="$4"
-                            theme={typeColors[type]}
-                            onPress={() => onClose()}
-                            width="$12"
-                        >
-                            OK
-                        </Button>
-                    </Stack>
-                </Dialog.Content>
-            </Dialog.Portal>
-        </Dialog>
-    )
+          <Stack items="center">
+            <Stack theme={typeColors[variant]}>{typeIcons[variant]}</Stack>
+            <Text fontSize="$6" fontWeight="bold" text="center">
+              {title}
+            </Text>
+            {message && (
+              <Text mt="$2" text="center">
+                {message}
+              </Text>
+            )}
+
+            <Button
+              mt="$4"
+              theme={typeColors[variant]}
+              onPress={() => onClose && onClose()}
+              width="$12"
+            >
+              OK
+            </Button>
+          </Stack>
+        </AlertDialog.Content>
+      </AlertDialog.Portal>
+    </AlertDialog>
+  )
 }

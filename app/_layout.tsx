@@ -1,9 +1,9 @@
 import '../tamagui-web.css'
 
 import {
-    DarkTheme,
-    DefaultTheme,
-    ThemeProvider,
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
 } from '@react-navigation/native'
 import { Stack } from 'expo-router'
 import { Platform, useColorScheme } from 'react-native'
@@ -22,55 +22,54 @@ import * as SecureStore from 'expo-secure-store'
 import { GlobalDialog } from '@/components/GlobalDialog'
 
 function App() {
-    const dispatch = useAppDispatch()
-    const getData = async () => {
-        let user: AuthDto | null = null
-        if (Platform.OS == 'ios' || Platform.OS == 'android') {
-            user = JSON.parse((await SecureStore.getItemAsync('user')) ?? '{}')
-        } else {
-            user = JSON.parse((await AsyncStorage.getItem('user')) ?? '{}')
-        }
-        if (user?.token) dispatch(setUser(user))
+  const dispatch = useAppDispatch()
+  const getData = async () => {
+    let user: AuthDto | null = null
+    if (Platform.OS == 'ios' || Platform.OS == 'android') {
+      user = JSON.parse((await SecureStore.getItemAsync('user')) ?? '{}')
+    } else {
+      user = JSON.parse((await AsyncStorage.getItem('user')) ?? '{}')
     }
+    if (user?.token) dispatch(setUser(user))
+  }
 
-    useEffect(() => {
-        getData()
-    }, [])
+  useEffect(() => {
+    getData()
+  }, [])
 
-    return (
-        <Stack>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="auth" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
-    )
+  return (
+    <Stack>
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="auth" options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    </Stack>
+  )
 }
 
 export default function RootLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode
+  children: React.ReactNode
 }) {
-    const colorScheme = useColorScheme()
+  const colorScheme = useColorScheme()
 
-    return (
-        <SafeAreaProvider>
-            <Provider store={store}>
-                <TamaguiProvider
-                    config={tamaguiConfig}
-                    defaultTheme={colorScheme!}
-                >
-                    <StatusBar style="auto" backgroundColor="" />
-                    <ThemeProvider
-                        value={
-                            colorScheme === 'dark' ? DarkTheme : DefaultTheme
-                        }
-                    >
-                        <GlobalDialog />
-                        <App />
-                    </ThemeProvider>
-                </TamaguiProvider>
-            </Provider>
-        </SafeAreaProvider>
-    )
+  return (
+    <SafeAreaProvider>
+      <Provider store={store}>
+        <TamaguiProvider config={tamaguiConfig} defaultTheme={colorScheme!}>
+          <StatusBar style="auto" backgroundColor="" />
+          <ThemeProvider
+            value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
+          >
+            <GlobalDialog />
+            <App />
+          </ThemeProvider>
+        </TamaguiProvider>
+      </Provider>
+    </SafeAreaProvider>
+  )
+}
+
+export const unstable_settings = {
+  initialRouteName: 'index',
 }

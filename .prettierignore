@@ -7,3 +7,11 @@ coverage
 **/.svn
 **/.hg
 **/node_modules
+
+# Tamagui
+tamagui-web.css
+
+# Android
+android
+# iOS
+ios
