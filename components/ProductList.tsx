@@ -1,25 +1,26 @@
 import DataWrapper from '@/components/DataWrapper'
-import { useRouter } from 'expo-router'
+import { ProductItem } from '@/components/ProductItem'
+import { useGetProductsQuery } from '@/utils/api.service'
 import { FlatList, RefreshControl } from 'react-native'
-import { Stack, View, Button, Text, XStack } from 'tamagui'
+import { Stack, View, Button, XStack } from 'tamagui'
 import React, { useState, useMemo } from 'react'
 import { SearchBar } from '@/components/SearchBar'
 import { FilterModal } from '@/components/FilterModal'
 import { SortSelect } from '@/components/SortSelect'
-import { useGetOrdersQuery } from '@/utils/api.service'
-import { OrderItem } from '@/components/OrderItem'
-import { SORT_OPTIONS } from '@/constants'
+import { GetProductsQueryDto, ProductDto } from '@/dto/product.dto'
+import { BASE_PRODUCT_QUERY, SORT_OPTIONS } from '@/constants'
 import { Filter } from '@tamagui/lucide-icons'
 
 const normalize = (text: string) =>
-  text
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
+  text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
 
-export default function Inventory() {
-  const router = useRouter()
-  const { data, isFetching, error, refetch } = useGetOrdersQuery()
+interface ProductListProps {
+  onProductPress?: (product: ProductDto) => void
+  showFAB?: React.ReactNode
+}
+
+export function ProductList({ onProductPress, showFAB }: ProductListProps) {
+  const { data, isFetching, error, refetch } = useGetProductsQuery(BASE_PRODUCT_QUERY)
 
   const [searchQuery, setSearchQuery] = useState('')
   const [filterVisible, setFilterVisible] = useState(false)
@@ -29,9 +30,22 @@ export default function Inventory() {
 
   const filteredData = useMemo(() => {
     if (!data) return []
-    return data.filter((item) =>
-      normalize(item.name).includes(normalize(searchQuery))
-    )
+    return data
+      .filter((item) => normalize(item.name).includes(normalize(searchQuery)))
+      .filter(
+        (item) =>
+          item.categories &&
+          (selectedCategories.length === 0 ||
+            selectedCategories.includes(item.categories[0]))
+      )
+      .filter(
+        (item) => item.price >= priceRange[0] && item.price <= priceRange[1]
+      )
+      .sort((a, b) => {
+        if (sortByLocal === 'price-asc') return a.price - b.price
+        if (sortByLocal === 'price-desc') return b.price - a.price
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      })
   }, [data, searchQuery, selectedCategories, priceRange, sortByLocal])
 
   return (
@@ -52,12 +66,19 @@ export default function Inventory() {
         </Button>
       </XStack>
       <FlatList
-        data={data}
+        data={filteredData}
         refreshControl={
           <RefreshControl refreshing={false} onRefresh={refetch} />
         }
-        renderItem={({ item }) => <OrderItem item={item} key={item.id} />}
+        renderItem={({ item }) => (
+          <ProductItem
+            product={item}
+            key={item.id}
+            onPress={onProductPress ? () => onProductPress(item) : undefined}
+          />
+        )}
       />
+      {showFAB}
       <FilterModal
         visible={filterVisible}
         initialCategories={selectedCategories}

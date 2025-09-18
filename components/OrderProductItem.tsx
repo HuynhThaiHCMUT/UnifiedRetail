@@ -1,9 +1,8 @@
-import { ProductDto } from '@/dto/product.dto'
 import { useGetProductQuery } from '@/utils/api.service'
 import getImageUrl from '@/utils/get-image'
 import { useAppDispatch } from '@/utils/hook'
 import { OrderProductItemDto, updateQuantity } from '@/utils/order.slice'
-import { Link, useRouter } from 'expo-router'
+import { Minus, Plus } from '@tamagui/lucide-icons'
 import { XStack, Text, Image, Stack, Button } from 'tamagui'
 
 export interface OrderProductItemProps {
@@ -34,7 +33,7 @@ export function OrderProductItem({ item }: OrderProductItemProps) {
             <Text ml="$4">{item.total} đ</Text>
           </XStack>
           <XStack items="center">
-            <Text mr="$4">{product.price} đ</Text>
+            <Text mr="$4" width="25%">{product.price} đ</Text>
             <Button
               size="$2"
               onPress={() =>
@@ -43,7 +42,7 @@ export function OrderProductItem({ item }: OrderProductItemProps) {
                 )
               }
             >
-              -
+              <Minus size={12} />
             </Button>
             <Text mx="$2">{item.quantity}</Text>
             <Button
@@ -54,7 +53,7 @@ export function OrderProductItem({ item }: OrderProductItemProps) {
                 )
               }
             >
-              +
+              <Plus size={12} />
             </Button>
           </XStack>
         </Stack>

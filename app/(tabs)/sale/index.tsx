@@ -82,6 +82,7 @@ export default function SaleScreen() {
           Đơn hàng
         </Text>
         <Button
+          size="$3"
           theme="blue"
           onPress={() => router.push('/(tabs)/sale/select-product')}
         >
@@ -100,10 +101,10 @@ export default function SaleScreen() {
           Tổng tiền: {total} đ
         </Text>
         <XStack width="100%" items="center" gap="$2" mt="$2">
-          <Button flex={1} theme="green" onPress={onCheckOut}>
+          <Button size="$3" flex={1} theme="green" onPress={onCheckOut}>
             <Text>Thanh toán</Text>
           </Button>
-          <Button flex={1} theme="red" onPress={onClearOrder}>
+          <Button size="$3" flex={1} theme="red" onPress={onClearOrder}>
             <Text>Xoá đơn</Text>
           </Button>
         </XStack>

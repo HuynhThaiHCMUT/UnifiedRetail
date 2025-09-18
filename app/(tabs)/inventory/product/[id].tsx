@@ -11,7 +11,7 @@ import {
 } from '@/utils/api.service'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import { useLayoutEffect, useState } from 'react'
+import { useCallback, useLayoutEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button, Image, Stack, Text, XStack } from 'tamagui'
 import { useEffect } from 'react'
@@ -21,7 +21,7 @@ import handleError from '@/utils/error-handler'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { ImagePickerAsset } from 'expo-image-picker'
 import { pickImage } from '@/utils/image-picker'
-import { Image as ImageIcon } from '@tamagui/lucide-icons'
+import { Image as ImageIcon, Trash2 } from '@tamagui/lucide-icons'
 import getImageUrl from '@/utils/get-image'
 
 export default function ProductDetail() {
@@ -129,7 +129,7 @@ export default function ProductDetail() {
     }
   }
 
-  const onDelete = async () => {
+  const onDelete = useCallback(async () => {
     registerDialogCallback('onDialogConfirm', async () => {
       try {
         const result = await deleteProduct(id)
@@ -168,7 +168,7 @@ export default function ProductDetail() {
         message: 'Bạn có chắc chắn muốn xoá sản phẩm này?',
       })
     )
-  }
+  }, [id, dispatch, deleteProduct, router])
 
   const onPickImages = async () => {
     const img = await pickImage()
@@ -181,6 +181,7 @@ export default function ProductDetail() {
       headerRight: () =>
         !isNew && (
           <Button size="$2" theme="red" disabled={isLoading} onPress={onDelete}>
+            <Trash2 size={12} />
             Xoá
           </Button>
         ),
@@ -190,7 +191,7 @@ export default function ProductDetail() {
   return (
     <>
       <ScreenContainer>
-        <Stack p="$4" flex={1} gap="$2">
+        <Stack px="$4" flex={1} gap="$2">
           <FormInput
             control={control}
             name="name"

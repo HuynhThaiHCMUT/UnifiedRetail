@@ -74,7 +74,7 @@ export function FilterModal({
           exitStyle={{ opacity: 0, scale: 0.95 }}
           gap="$4"
           p="$4"
-          width={350}
+          width="80%"
           maxH="90%"
         >
           <Dialog.Title>Bộ lọc</Dialog.Title>

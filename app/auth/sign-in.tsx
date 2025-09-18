@@ -81,18 +81,18 @@ export default function SignIn() {
           </Button>
 
           {/* <Text
-                        text="center"
-                        fontSize="$2"
-                    >
-                        Bạn chưa có tài khoản?{' '}
-                        <Text
-                            theme="blue"
-                            hoverStyle={{ textDecorationLine: 'underline', cursor: 'pointer' }}
-                            onPress={() => router.push('/auth/sign-up')}
-                        >
-                            Đăng ký
-                        </Text>
-                    </Text> */}
+            text="center"
+            fontSize="$2"
+          >
+            Bạn chưa có tài khoản?{' '}
+            <Text
+              theme="blue"
+              hoverStyle={{ textDecorationLine: 'underline', cursor: 'pointer' }}
+              onPress={() => router.push('/auth/sign-up')}
+            >
+              Đăng ký
+            </Text>
+          </Text> */}
         </Stack>
       </Stack>
     </ScreenContainer>

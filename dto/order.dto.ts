@@ -51,7 +51,12 @@ export const OrderDtoSchema = z.object({
   createdAt: dateSchema('Ngày tạo'),
   updatedAt: dateSchema('Ngày cập nhật'),
   staffId: z.string().nullish(),
-  products: z.array(z.object({ OrderProductDtoSchema })),
+  products: z.array(OrderProductDtoSchema),
+  customerId: z.string().nullish(),
+  address: z.string().nullish(),
+  phone: phoneSchema.nullish(),
+  email: emailSchema.nullish(),
+  customerName: z.string().nullish(),
 })
 
 export type OrderDto = z.infer<typeof OrderDtoSchema>

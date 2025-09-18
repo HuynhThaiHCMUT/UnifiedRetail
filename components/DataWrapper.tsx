@@ -1,7 +1,7 @@
 import handleError from '@/utils/error-handler'
-import { Spinner, Stack, Text, Button } from 'tamagui'
+import { Spinner, Stack, Text, Button, StackProps } from 'tamagui'
 
-interface DataWrapperProps {
+interface DataWrapperProps extends StackProps {
   isLoading: boolean
   error: any
   refetch?: () => void
@@ -13,6 +13,7 @@ const DataWrapper = ({
   error,
   refetch,
   children,
+  ...rest
 }: DataWrapperProps) => {
   if (isLoading) {
     return (
@@ -23,6 +24,7 @@ const DataWrapper = ({
         items="center"
         justify="center"
         gap="$4"
+        {...rest}
       >
         <Spinner size="large" color="$color" />
       </Stack>
@@ -31,7 +33,15 @@ const DataWrapper = ({
 
   if (error) {
     return (
-      <Stack p="$4" width="100%" height="100%" items="center" justify="center">
+      <Stack 
+        p="$4"
+        width="100%"
+        height="100%"
+        items="center"
+        justify="center"
+        gap="$4"
+        {...rest}
+      >
         <Text fontWeight="bold" mb="$4">
           {handleError(error)}
         </Text>
@@ -40,7 +50,7 @@ const DataWrapper = ({
     )
   }
 
-  return <>{children}</>
+  return <Stack p='$4' flex={1} {...rest}>{children}</Stack>
 }
 
 export default DataWrapper
