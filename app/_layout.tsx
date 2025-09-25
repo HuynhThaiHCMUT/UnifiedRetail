@@ -8,7 +8,7 @@ import {
 } from '@react-navigation/native'
 import { Stack } from 'expo-router'
 import { Platform, useColorScheme } from 'react-native'
-import { TamaguiProvider, useTheme } from 'tamagui'
+import { TamaguiProvider, View } from 'tamagui'
 import { StatusBar } from 'expo-status-bar'
 import { tamaguiConfig } from '../tamagui.config'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -43,11 +43,13 @@ function App() {
   colors.background = 'transparent';  
 
   return (
-    <Stack>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="auth" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-    </Stack>
+    <View bg="$background" flex={1}>
+      <Stack>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="auth" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
+    </View>
   )
 }
 
