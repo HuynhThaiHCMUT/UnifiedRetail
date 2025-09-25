@@ -1,5 +1,5 @@
 import { closeDialog, runDialogCallback } from '@/utils/dialog.slice'
-import { useAppDispatch, useAppSelector } from '@/utils/hook'
+import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks'
 import { IconDialog } from './IconDialog'
 import { RootState } from '@/utils/store'
 import { ConfirmDialog } from './ConfirmDialog'

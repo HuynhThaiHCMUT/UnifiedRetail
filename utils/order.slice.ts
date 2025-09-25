@@ -1,11 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import type { RootState } from './store'
 
 export interface OrderProductItemDto {
   id: string
   name: string
   quantity: number
-  unit?: string
+  unit: string
   price: number
   total: number
 }
@@ -73,12 +72,22 @@ const orderSlice = createSlice({
         id: string
         oldUnit: string
         newUnit: string
+        price: number
       }>
     ) => {
       const item = state.items.find(
         (i) => i.id === action.payload.id && i.unit === action.payload.oldUnit
       )
-      if (item) item.unit = action.payload.newUnit
+      if (item) {
+        item.unit = action.payload.newUnit
+        item.price = action.payload.price
+        item.total = item.price * item.quantity
+        // Update total price of the order
+        state.total = state.items.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0
+        )
+      }
     },
     clearOrder: (state) => {
       state.items = []

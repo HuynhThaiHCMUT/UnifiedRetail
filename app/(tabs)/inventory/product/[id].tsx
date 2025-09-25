@@ -11,18 +11,22 @@ import {
 } from '@/utils/api.service'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import { useCallback, useLayoutEffect, useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button, Image, Stack, Text, XStack } from 'tamagui'
 import { useEffect } from 'react'
 import { openDialog, registerDialogCallback } from '@/utils/dialog.slice'
-import { useAppDispatch } from '@/utils/hook'
+import { useAppDispatch } from '@/hooks/useAppHooks'
 import handleError from '@/utils/error-handler'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { ImagePickerAsset } from 'expo-image-picker'
 import { pickImage } from '@/utils/image-picker'
 import { Image as ImageIcon, Trash2 } from '@tamagui/lucide-icons'
 import getImageUrl from '@/utils/get-image'
+import { Divider } from '@/components/Divider'
+import UnitsEditor from '@/components/UnitsEditor'
+import { UnitDto } from '@/dto/unit.dto'
+import { useConfirmAction } from '@/hooks/useConfirmAction'
 
 export default function ProductDetail() {
   const navigation = useNavigation()
@@ -42,21 +46,26 @@ export default function ProductDetail() {
   const [deleteProduct, { isLoading: deleting }] = useDeleteProductMutation()
   const [uploadProductImages] = useUploadProductImagesMutation()
   const [images, setImages] = useState<ImagePickerAsset[]>([])
+  const unitEditorRef = useRef<{ validateAndSave: () => UnitDto[] | null }>()
 
   const {
     control,
     handleSubmit,
     reset,
+    getValues,
+    watch,
     formState: { errors },
   } = useForm<CreateProductDto>({
     resolver: zodResolver(CreateProductDtoSchema),
     defaultValues: {
       categories: [],
+      units: [],
     },
   })
 
   useEffect(() => {
     if (data && !isNew) {
+
       reset({
         ...data,
         quantity: data.quantity?.toString() as unknown as number,
@@ -68,11 +77,15 @@ export default function ProductDetail() {
 
   const onSubmit = async (formData: CreateProductDto) => {
     try {
+      const units = unitEditorRef.current?.validateAndSave()
+      if (!units) return
+
       const parsedData = {
         ...formData,
         quantity: parseInt(formData.quantity as unknown as string),
         price: parseInt(formData.price as unknown as string),
         basePrice: parseInt(formData.basePrice as unknown as string),
+        units: units ?? [],
       }
 
       const result = isNew
@@ -129,51 +142,27 @@ export default function ProductDetail() {
     }
   }
 
-  const onDelete = useCallback(async () => {
-    registerDialogCallback('onDialogConfirm', async () => {
-      try {
-        const result = await deleteProduct(id)
-        if ('error' in result) {
-          dispatch(
-            openDialog({
-              variant: 'error',
-              title: 'Xoá sản phẩm thất bại',
-              message: handleError(result.error),
-            })
-          )
-          return
-        }
-        dispatch(
-          openDialog({
-            variant: 'success',
-            title: 'Xoá sản phẩm thành công',
-          })
-        )
-        router.back()
-      } catch (err) {
-        dispatch(
-          openDialog({
-            variant: 'error',
-            title: 'Lỗi không xác định',
-            message: 'Vui lòng thử lại',
-          })
-        )
-      }
-    })
-    dispatch(
-      openDialog({
-        type: 'confirm',
-        variant: 'warning',
-        title: 'Xoá sản phẩm',
-        message: 'Bạn có chắc chắn muốn xoá sản phẩm này?',
-      })
-    )
-  }, [id, dispatch, deleteProduct, router])
-
   const onPickImages = async () => {
     const img = await pickImage()
     if (img) setImages([...images, ...img])
   }
+
+  const { askConfirm } = useConfirmAction({
+    confirmTitle: 'Xoá sản phẩm',
+    confirmMessage: 'Bạn có chắc chắn muốn xoá sản phẩm này?',
+    successTitle: 'Xoá sản phẩm thành công',
+    errorTitle: 'Xoá sản phẩm thất bại',
+  })
+
+  const onDelete = useCallback(() => {
+    askConfirm(
+      async () => {
+        const result = await deleteProduct(id)
+        return result
+      },
+      { onSuccess: () => router.back() }
+    )
+  }, [askConfirm, deleteProduct, id, router])
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -225,8 +214,8 @@ export default function ProductDetail() {
           <FormInput
             control={control}
             name="baseUnit"
-            label="Tên đơn vị:"
-            placeholder="Nhập tên đơn vị"
+            label="Đơn vị cơ bản:"
+            placeholder="Nhập đơn vị cơ bản (ví dụ: cái, hộp, kg...)"
             errors={errors}
           />
           <XStack gap="$2">
@@ -247,7 +236,8 @@ export default function ProductDetail() {
               containerProps={{ flex: 1 }}
             />
           </XStack>
-          <Text>Ảnh sản phẩm:</Text>
+          <Divider thickness={6} my="$2" mx="$-4" fullBleed />
+          <Text fontWeight="bold">Ảnh sản phẩm:</Text>
           <XStack flexWrap="wrap" gap="$2" width="100%" items="center">
             <Stack
               onPress={onPickImages}
@@ -268,7 +258,7 @@ export default function ProductDetail() {
                   source={{ uri: image.uri }}
                   width="$6"
                   height="$6"
-                  alt="Product Image"
+                  alt="Ảnh sản phẩm"
                 />
               ))}
             {data?.pictures &&
@@ -278,11 +268,20 @@ export default function ProductDetail() {
                   source={{ uri: getImageUrl(picture) }}
                   width="$6"
                   height="$6"
-                  alt="Product Image"
+                  alt="Ảnh sản phẩm"
                 />
               ))}
           </XStack>
+          <Divider thickness={6} my="$2" mx="$-4" fullBleed />
         </Stack>
+        {watch('baseUnit') && (
+          <UnitsEditor
+            ref={unitEditorRef}
+            baseUnitName={getValues('baseUnit') ?? ''}
+            units={data?.units ?? []}
+          />
+        )}
+        <Divider thickness={6} my="$2" />
       </ScreenContainer>
       <Button
         onPress={handleSubmit(onSubmit)}

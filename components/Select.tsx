@@ -6,6 +6,7 @@ import {
   ListItem,
   Stack,
   StackProps,
+  ButtonProps,
 } from 'tamagui'
 import { Portal } from '@tamagui/portal'
 import { View } from 'react-native'
@@ -16,11 +17,12 @@ type Option = {
 }
 
 export interface SelectProps extends StackProps {
-  options: Option[]
-  value: string
+  options: Option[] | string[]
+  value?: string
   onChange: (value: string) => void
   placeholder?: string
   trigger?: React.ReactNode // let consumers define their trigger UI
+  size?: ButtonProps['size'] // size prop to control button size
 }
 
 export function Select({
@@ -29,8 +31,13 @@ export function Select({
   onChange,
   placeholder = 'Select...',
   trigger,
+  size = '$3',
   ...rest
 }: SelectProps) {
+  const parsedOptions: Option[] =
+    typeof options[0] === 'string'
+      ? (options as string[]).map((opt) => ({ label: opt, value: opt }))
+      : (options as Option[])
   const [open, setOpen] = useState(false)
   const [dropdownPos, setDropdownPos] = useState<{
     x: number
@@ -42,7 +49,7 @@ export function Select({
   const buttonRef = useRef<View>(null)
 
   const selectedLabel =
-    options.find((opt) => opt.value === value)?.label ?? placeholder
+    parsedOptions.find((opt) => opt.value === value)?.label ?? placeholder
 
   const toggleDropdown = () => {
     if (open) {
@@ -59,7 +66,7 @@ export function Select({
   return (
     <YStack {...rest}>
       {/* Trigger */}
-      <Button ref={buttonRef} size="$3" onPress={toggleDropdown}>
+      <Button ref={buttonRef} size={size} onPress={toggleDropdown}>
         {trigger ?? selectedLabel}
       </Button>
 
@@ -81,7 +88,6 @@ export function Select({
             position="absolute"
             t={dropdownPos.y + dropdownPos.height + 20}
             l={dropdownPos.x}
-            width={dropdownPos.width}
             z={100}
             bg="$background"
             borderWidth={1}
@@ -91,9 +97,10 @@ export function Select({
             elevationAndroid={4}
             shadowColor="rgba(0,0,0,0.2)"
           >
-            {options.map((opt) => (
+            {parsedOptions.map((opt) => (
               <ListItem
                 key={opt.value}
+                size={size}
                 onPress={() => {
                   onChange(opt.value)
                   setOpen(false)

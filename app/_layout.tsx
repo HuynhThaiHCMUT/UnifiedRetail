@@ -4,22 +4,24 @@ import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
+  useTheme as useNavigationTheme,
 } from '@react-navigation/native'
 import { Stack } from 'expo-router'
 import { Platform, useColorScheme } from 'react-native'
-import { TamaguiProvider } from 'tamagui'
+import { TamaguiProvider, useTheme } from 'tamagui'
 import { StatusBar } from 'expo-status-bar'
 import { tamaguiConfig } from '../tamagui.config'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { Provider } from 'react-redux'
 import { store } from '@/utils/store'
 import { useEffect } from 'react'
-import { useAppDispatch } from '@/utils/hook'
+import { useAppDispatch } from '@/hooks/useAppHooks'
 import { AuthDto } from '@/dto/auth.dto'
 import { setUser } from '@/utils/auth.slice'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as SecureStore from 'expo-secure-store'
 import { GlobalDialog } from '@/components/GlobalDialog'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 function App() {
   const dispatch = useAppDispatch()
@@ -36,6 +38,9 @@ function App() {
   useEffect(() => {
     getData()
   }, [])
+
+  const { colors } = useNavigationTheme();
+  colors.background = 'transparent';  
 
   return (
     <Stack>
@@ -56,15 +61,17 @@ export default function RootLayout({
   return (
     <SafeAreaProvider>
       <Provider store={store}>
-        <TamaguiProvider config={tamaguiConfig} defaultTheme={colorScheme!}>
-          <StatusBar style="auto" backgroundColor="" />
-          <ThemeProvider
-            value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
-          >
-            <GlobalDialog />
-            <App />
-          </ThemeProvider>
-        </TamaguiProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <TamaguiProvider config={tamaguiConfig} defaultTheme={colorScheme!}>
+            <StatusBar style="auto" backgroundColor="" />
+            <ThemeProvider
+              value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
+            >
+              <GlobalDialog />
+              <App />
+            </ThemeProvider>
+          </TamaguiProvider>
+        </GestureHandlerRootView>
       </Provider>
     </SafeAreaProvider>
   )

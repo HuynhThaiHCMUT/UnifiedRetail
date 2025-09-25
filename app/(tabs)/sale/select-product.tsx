@@ -1,6 +1,6 @@
 import { ProductList } from '@/components/ProductList'
 import { useRouter } from 'expo-router'
-import { useAppDispatch } from '@/utils/hook'
+import { useAppDispatch } from '@/hooks/useAppHooks'
 import { addItem } from '@/utils/order.slice'
 import { ProductDto } from '@/dto/product.dto'
 import React from 'react'

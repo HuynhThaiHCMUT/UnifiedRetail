@@ -1,18 +1,60 @@
 import { useRouter } from 'expo-router'
-import { useAppSelector, useAppDispatch } from '@/utils/hook'
+import { useAppSelector, useAppDispatch } from '@/hooks/useAppHooks'
 import { clearOrder, OrderProductItemDto } from '@/utils/order.slice'
 import { Button, Stack, Text, XStack } from 'tamagui'
-import { FlatList } from 'react-native'
-import { OrderProductItem } from '@/components/OrderProductItem'
+import { FlatList, Pressable } from 'react-native'
+import { OrderProductItem, OrderProductItemRef } from '@/components/OrderProductItem'
 import { openDialog, registerDialogCallback } from '@/utils/dialog.slice'
 import { useCreatePOSOrderMutation } from '@/utils/api.service'
 import handleError from '@/utils/error-handler'
+import { useRef } from 'react'
 
 export default function SaleScreen() {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const items = useAppSelector((state) => state.order.items)
   const total = useAppSelector((state) => state.order.total)
+
+  const openRowIdRef = useRef<string | null>(null)
+  const rowRefs = useRef(new Map<string, OrderProductItemRef | null>())
+
+  const handleRowOpen = (id: string) => {
+    const prevId = openRowIdRef.current
+    if (prevId && prevId !== id) {
+      const prevRef = rowRefs.current.get(prevId)
+      prevRef?.close()
+    }
+    openRowIdRef.current = id
+  }
+
+  const handleOutsidePress = () => {
+    if (openRowIdRef.current) {
+      const prevRef = rowRefs.current.get(openRowIdRef.current)
+      prevRef?.close()
+      openRowIdRef.current = null
+    }
+  }
+
+  const renderItem = ({ item }: {item: OrderProductItemDto}) => {
+    const setRef = (r: OrderProductItemRef | null) => {
+      if (r) rowRefs.current.set(item.id, r)
+      else rowRefs.current.delete(item.id)
+    }
+
+    return (
+      <OrderProductItem
+        ref={setRef}
+        item={item}
+        editable
+        onOpen={() => handleRowOpen(item.id)}
+        onDelete={() => {
+          const ref = rowRefs.current.get(item.id)
+          ref?.close()
+          if (openRowIdRef.current === item.id) openRowIdRef.current = null
+        }}
+      />
+    )
+  }
 
   const [createOrder, { isLoading: isCreatingOrder }] =
     useCreatePOSOrderMutation()
@@ -76,7 +118,7 @@ export default function SaleScreen() {
   }
 
   return (
-    <>
+    <Pressable style={{ flex: 1 }} onPress={handleOutsidePress}>
       <XStack justify="space-between" items="center" px="$4" py="$2">
         <Text fontSize="$5" ml="$4" fontWeight="bold">
           Đơn hàng
@@ -92,8 +134,9 @@ export default function SaleScreen() {
       <Stack flex={1} px="$4">
         <FlatList
           data={items}
-          keyExtractor={(item) => `${item.id}-${item.unit}`}
-          renderItem={({ item }) => <OrderProductItem item={item} />}
+          renderItem={renderItem}
+          keyExtractor={(i) => i.id}
+          onScrollBeginDrag={handleOutsidePress}
         />
       </Stack>
       <Stack px="$4" py="$2" bg="$background">
@@ -109,6 +152,6 @@ export default function SaleScreen() {
           </Button>
         </XStack>
       </Stack>
-    </>
+    </Pressable>
   )
 }

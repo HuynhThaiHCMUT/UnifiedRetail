@@ -1,5 +1,5 @@
 import { removeUser } from '@/utils/auth.slice'
-import { useAppDispatch } from '@/utils/hook'
+import { useAppDispatch } from '@/hooks/useAppHooks'
 import { XStack, Button } from 'tamagui'
 
 export default function Setting() {

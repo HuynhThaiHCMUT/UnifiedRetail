@@ -1,4 +1,4 @@
-import { useAppSelector } from '@/utils/hook'
+import { useAppSelector } from '@/hooks/useAppHooks'
 import { Redirect, Tabs } from 'expo-router'
 import {
   Cog,

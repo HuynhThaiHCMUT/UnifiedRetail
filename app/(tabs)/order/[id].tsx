@@ -2,16 +2,68 @@ import DataWrapper from '@/components/DataWrapper'
 import { Divider } from '@/components/Divider'
 import { OrderProductItem } from '@/components/OrderProductItem'
 import { ORDER_STATUS_COLORS, ORDER_STATUS, BASE_PRODUCT_QUERY } from '@/constants'
-import { useGetOrderQuery, useGetProductsQuery } from '@/utils/api.service'
+import { useDeleteOrderMutation, useGetOrderQuery, useGetProductsQuery } from '@/utils/api.service'
+import { registerDialogCallback, openDialog } from '@/utils/dialog.slice'
+import handleError from '@/utils/error-handler'
+import { useAppDispatch } from '@/hooks/useAppHooks'
 import { OrderProductItemDto } from '@/utils/order.slice'
-import { useLocalSearchParams } from 'expo-router'
+import { Trash2 } from '@tamagui/lucide-icons'
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
+import { useCallback, useLayoutEffect } from 'react'
 import { FlatList } from 'react-native'
-import { Stack, XStack, Text } from 'tamagui'
+import { Stack, XStack, Text, Button } from 'tamagui'
+import { useConfirmAction } from '@/hooks/useConfirmAction'
 
 export default function Order() {
-  const { id } = useLocalSearchParams()
+  const navigation = useNavigation()
+  const router = useRouter()
+  const dispatch = useAppDispatch()
+
+  const { id: idParam } = useLocalSearchParams()
+  const id = idParam instanceof Array ? idParam[0] : idParam
   const { data, isLoading, error, refetch } = useGetOrderQuery(id as string)
   const { data: products } = useGetProductsQuery(BASE_PRODUCT_QUERY)
+
+  const [deleteOrder, { isLoading: deleting }] = useDeleteOrderMutation()
+
+  const orderProducts = data?.products.map((orderProduct) => {
+    const product = products?.find((p) => p.id === orderProduct.productId)
+    return {
+      id: orderProduct.productId,
+      name: product?.name || 'Unknown Product',
+      quantity: orderProduct.quantity,
+      unit: orderProduct.unitName,
+      price: orderProduct.price,
+      total: orderProduct.price * orderProduct.quantity,
+    } as OrderProductItemDto
+  })
+
+  const { askConfirm } = useConfirmAction({
+    confirmTitle: 'Xoá đơn hàng',
+    confirmMessage: 'Bạn có chắc chắn muốn xoá đơn hàng này?',
+    successTitle: 'Xoá đơn hàng thành công',
+    errorTitle: 'Xoá đơn hàng thất bại',
+  })
+
+  const onDelete = useCallback(() => {
+    askConfirm(
+      async () => {
+        const result = await deleteOrder(id)
+        return result
+      },
+      { onSuccess: () => router.back() }
+    )
+  }, [askConfirm, deleteOrder, id, router])
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () =>
+      <Button size="$2" theme="red" onPress={onDelete}>
+        <Trash2 size={12} />
+        Xoá
+      </Button>,
+    })
+  }, [id, navigation])
 
   return (
     <DataWrapper p='$0' isLoading={isLoading} error={error} refetch={refetch}>
@@ -40,11 +92,11 @@ export default function Order() {
         <Text fontSize='$6' fontWeight='bold'>
           Sản phẩm
         </Text>
-        {/* <FlatList
-          data={data?.products ?? []}
+        <FlatList
+          data={orderProducts ?? []}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <OrderProductItem item={item} />}
-        /> */}
+          renderItem={({ item }) => <OrderProductItem item={item} editable={false} />}
+        />
       </Stack>
     </DataWrapper>
   )
